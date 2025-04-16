@@ -1,0 +1,119 @@
+/**
+ * Plugin Reporter Admin CSS
+ */
+
+/* Plugin summary cards */
+.plugin-reporter-summary {
+    margin-top: 20px;
+    background: #fff;
+    padding: 15px;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.summary-cards {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.summary-card {
+    flex: 1;
+    min-width: 200px;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.summary-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+/* Status indicators */
+.update-available {
+    color: #d54e21;
+    font-weight: bold;
+}
+
+.up-to-date {
+    color: #46b450;
+}
+
+/* Plugin status badges */
+.plugin-card {
+    display: inline-block;
+    margin-right: 10px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+}
+
+.plugin-card.active {
+    background: #e7f7e5;
+    border: 1px solid #8bcb81;
+}
+
+.plugin-card.inactive {
+    background: #f7f7f7;
+    border: 1px solid #e0e0e0;
+}
+
+.plugin-status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Row actions */
+.row-actions {
+    color: #777;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Tab styling */
+.plugin-reporter-tabs {
+    margin-top: 20px;
+}
+
+.plugin-reporter-tabs .nav-tab {
+    position: relative;
+}
+
+.plugin-reporter-tabs .update-count {
+    display: inline-block;
+    vertical-align: top;
+    margin: 1px 0 0 2px;
+    padding: 0 5px;
+    min-width: 7px;
+    height: 17px;
+    border-radius: 11px;
+    background-color: #d54e21;
+    color: #fff;
+    font-size: 9px;
+    line-height: 17px;
+    text-align: center;
+    z-index: 26;
+}
+
+/* Export options */
+.plugin-reporter-export {
+    margin-bottom: 20px;
+}
+
+.export-options {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Footer links */
+.plugin-reporter-footer {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #666;
+}
