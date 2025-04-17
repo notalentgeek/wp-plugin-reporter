@@ -1,11 +1,16 @@
 # WordPress Plugin Reporter
 
+[![WordPress Compatible](https://img.shields.io/badge/WordPress-5.0%20to%206.5-blue.svg)](https://wordpress.org/)
+[![PHP Compatible](https://img.shields.io/badge/PHP-7.2%20to%208.2-purple.svg)](https://www.php.net/)
+[![License](https://img.shields.io/badge/license-GPL%20v2%20or%20later-yellow.svg)](http://www.gnu.org/licenses/gpl-2.0.html)
+
 A comprehensive WordPress plugin for extracting detailed information about installed plugins and exporting to CSV and JSON formats.
 
 ## Features
 
 - **Complete Plugin Information**: Collects key details about all installed plugins
 - **Multiple Export Formats**: Export data as CSV or JSON for different use cases
+- **Update Status Tracking**: Identifies plugins that need updates
 - **User-Friendly Interface**: Clean, intuitive admin interface with summary statistics
 - **Optimized for Analysis**: Export formats designed for easy analysis with spreadsheets or AI tools
 
@@ -28,81 +33,47 @@ A comprehensive WordPress plugin for extracting detailed information about insta
    - **Export as JSON**: Creates a JSON file for programmatic use or AI analysis
 4. Click your preferred export option and the file will download automatically
 
+## Why Use Plugin Reporter?
+
+Plugin Reporter is ideal for:
+
+- **Site Documentation**: Create comprehensive documentation of your WordPress setup
+- **Maintenance Planning**: Identify plugins needing updates for maintenance scheduling
+- **Site Analysis**: Export data to analyze your plugin usage patterns
+- **Handover Documentation**: Create detailed exports when transferring site management
+- **AI Tool Integration**: Generate structured data for analysis with AI tools
+
 ## Development
 
 ### Requirements
 
 - PHP 7.2 or higher
 - WordPress 5.0 or higher
-- Docker and Docker Compose (for local development)
+- WP-CLI (for running tests)
 
-### Docker Development Setup
+### Development Setup
 
-1. Clone the repository and navigate to your Docker WordPress environment:
+1. Clone the repository:
    ```bash
    git clone https://github.com/notalentgeek/wp-plugin-reporter.git
-   cd /path/to/your/docker-wordpress
+   cd wp-plugin-reporter
    ```
 
-2. Make sure the plugin is in your WordPress plugins directory that's mounted to Docker:
+2. Install dependencies:
    ```bash
-   # Example directory structure:
-   # /path/to/your/docker-wordpress/plugins/wp-plugin-reporter/
+   composer install
    ```
 
-3. Start your Docker environment:
-   ```bash
-   docker-compose up -d
-   ```
-
-4. Activate the plugin in WordPress:
-   ```bash
-   docker exec wordpress wp plugin activate wp-plugin-reporter --allow-root
-   ```
-
-### Running Tests with Docker
-
-1. Install Composer dependencies (if not already installed):
-   ```bash
-   docker exec -w /var/www/html/wp-content/plugins/wp-plugin-reporter wordpress composer install
-   ```
-
-2. Set up the WordPress test environment:
-   ```bash
-   docker exec -w /var/www/html/wp-content/plugins/wp-plugin-reporter wordpress ./bin/install-wp-tests.sh wordpress_test root wordpress db latest
-   ```
-
-3. Run the tests:
-   ```bash
-   docker exec -w /var/www/html/wp-content/plugins/wp-plugin-reporter wordpress ./vendor/bin/phpunit
-   ```
-
-4. Run tests with coverage reports:
-   ```bash
-   docker exec -w /var/www/html/wp-content/plugins/wp-plugin-reporter wordpress ./vendor/bin/phpunit --coverage-html ./reports/coverage
-   ```
-
-### Local Development Setup (Non-Docker)
-
-```bash
-# Clone the repository
-git clone https://github.com/notalentgeek/wp-plugin-reporter.git
-cd wp-plugin-reporter
-
-# Set up directories if needed
-mkdir -p includes admin/css admin/js admin/partials languages
-```
-
-### Running Tests (Non-Docker)
+### Running Tests
 
 The plugin includes unit tests built on the WordPress testing framework:
 
 ```bash
-# Set up the WordPress test environment
+# Set up the WordPress test environment (first time only)
 bash bin/install-wp-tests.sh wordpress_test root password localhost latest
 
 # Run the tests
-phpunit
+./vendor/bin/phpunit
 ```
 
 ## Structure
@@ -116,12 +87,14 @@ wp-plugin-reporter/
 │   └── class-plugin-reporter-admin.php
 ├── includes/                  # Core plugin functionality
 │   ├── class-plugin-reporter.php
-│   └── class-plugin-reporter-exporter.php
+│   ├── class-plugin-reporter-exporter.php
+│   └── class-plugin-reporter-update-info.php
 ├── languages/                 # Internationalization
 ├── tests/                     # Unit tests
+├── wp-plugin-reporter.php     # Main plugin file
+├── index.php                  # Directory protection
 ├── README.md                  # This file
-├── readme.txt                 # WordPress.org readme
-└── wp-plugin-reporter.php     # Main plugin file
+└── readme.txt                 # WordPress.org readme
 ```
 
 ## License
@@ -130,4 +103,4 @@ This plugin is licensed under the [GPL v2 or later](http://www.gnu.org/licenses/
 
 ## Credits
 
-Developed by the [New Naratif Development Team](https://newnaratif.com).
+Developed by the [New Naratif Development Team](https://newnaratif.com/).
