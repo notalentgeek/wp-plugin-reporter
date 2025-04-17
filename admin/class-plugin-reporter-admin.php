@@ -60,10 +60,10 @@ class Plugin_Reporter_Admin {
      * Initialize the class and set its properties.
      *
      * @since    1.0.0
-     * @param    string    $plugin_name       The name of this plugin.
-     * @param    string    $version    The version of this plugin.
-     * @param    Plugin_Reporter_Exporter    $exporter    The exporter instance.
-     * @param    Plugin_Reporter_Update_Info    $update_info    The update info instance.
+     * @param    string                       $plugin_name       The name of this plugin.
+     * @param    string                       $version           The version of this plugin.
+     * @param    Plugin_Reporter_Exporter     $exporter          The exporter instance.
+     * @param    Plugin_Reporter_Update_Info  $update_info       The update info instance.
      */
     public function __construct( $plugin_name, $version, $exporter, $update_info ) {
         $this->plugin_name = $plugin_name;
@@ -89,63 +89,7 @@ class Plugin_Reporter_Admin {
                 $this->version,
                 'all'
             );
-
-            // Add inline styles for update display
-            $this->add_admin_styles();
         }
-    }
-
-    /**
-     * Add admin styles for the page
-     *
-     * @since    1.0.0
-     */
-    private function add_admin_styles() {
-        $styles = '
-            .plugin-reporter-summary {
-                margin-top: 20px;
-                background: #fff;
-                padding: 15px;
-                border: 1px solid #ccd0d4;
-                box-shadow: 0 1px 1px rgba(0,0,0,.04);
-            }
-            .update-available {
-                color: #d54e21;
-                font-weight: bold;
-            }
-            .up-to-date {
-                color: #46b450;
-            }
-            .row-actions {
-                color: #777;
-                font-size: 12px;
-                margin-top: 4px;
-            }
-            .plugin-card {
-                display: inline-block;
-                margin-right: 10px;
-                padding: 3px 8px;
-                border-radius: 3px;
-                font-size: 11px;
-            }
-            .plugin-card.active {
-                background: #e7f7e5;
-                border: 1px solid #8bcb81;
-            }
-            .plugin-card.inactive {
-                background: #f7f7f7;
-                border: 1px solid #e0e0e0;
-            }
-            .plugin-status-badge {
-                display: inline-block;
-                padding: 4px 8px;
-                border-radius: 3px;
-                font-size: 12px;
-                font-weight: 500;
-            }
-        ';
-
-        wp_add_inline_style( $this->plugin_name, $styles );
     }
 
     /**
@@ -220,16 +164,16 @@ class Plugin_Reporter_Admin {
             }
 
             $plugins_data[] = array(
-                'file' => $plugin_file,
-                'name' => $plugin['Name'],
-                'description' => $plugin['Description'],
-                'author' => $plugin['Author'],
-                'plugin_uri' => isset( $plugin['PluginURI'] ) ? $plugin['PluginURI'] : '',
-                'is_active' => $is_active,
-                'status' => $is_active ? 'Active' : 'Inactive',
-                'version' => $plugin['Version'],
-                'current_version' => $update_info['current_version'],
-                'latest_version' => $update_info['latest_version'],
+                'file'             => $plugin_file,
+                'name'             => $plugin['Name'],
+                'description'      => $plugin['Description'],
+                'author'           => $plugin['Author'],
+                'plugin_uri'       => isset( $plugin['PluginURI'] ) ? $plugin['PluginURI'] : '',
+                'is_active'        => $is_active,
+                'status'           => $is_active ? 'Active' : 'Inactive',
+                'version'          => $plugin['Version'],
+                'current_version'  => $update_info['current_version'],
+                'latest_version'   => $update_info['latest_version'],
                 'update_available' => $update_info['update_available']
             );
         }
