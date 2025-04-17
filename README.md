@@ -50,6 +50,7 @@ Plugin Reporter is ideal for:
 - PHP 7.2 or higher
 - WordPress 5.0 or higher
 - WP-CLI (for running tests)
+- Local WordPress and MySQL setup or Docker/Podman for containerized development
 
 ### Development Setup
 
@@ -66,7 +67,35 @@ Plugin Reporter is ideal for:
 
 ### Running Tests
 
-The plugin includes unit tests built on the WordPress testing framework:
+The plugin includes unit tests built on the WordPress testing framework. You'll need a WordPress environment with MySQL set up to run the tests.
+
+#### Using Docker (Recommended)
+
+If you're using a Docker-based WordPress environment, you can run the tests with:
+
+```bash
+docker exec -w /var/www/html/wp-content/plugins/wp-plugin-reporter wordpress ./vendor/bin/phpunit
+```
+
+Sample output:
+```
+Installing...
+Running as single site... To run multisite, use -c tests/phpunit/multisite.xml
+Not running ajax tests. To execute these, use --group ajax.
+Not running ms-files tests. To execute these, use --group ms-files.
+Not running external-http tests. To execute these, use --group external-http.
+PHPUnit 9.6.22 by Sebastian Bergmann and contributors.
+
+.......                                                             7 / 7 (100%)
+
+Time: 00:00.053, Memory: 42.50 MB
+
+OK (7 tests, 29 assertions)
+```
+
+#### Local Environment
+
+For a local WordPress installation:
 
 ```bash
 # Set up the WordPress test environment (first time only)
