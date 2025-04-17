@@ -15,8 +15,11 @@
  * Author:            New Naratif Development Team
  * Author URI:        https://newnaratif.com
  * Text Domain:       plugin-reporter
+ * Domain Path:       /languages
  * License:           GPL v2 or later
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Requires at least: 5.0
+ * Requires PHP:      7.2
  */
 
 // If this file is called directly, abort.
