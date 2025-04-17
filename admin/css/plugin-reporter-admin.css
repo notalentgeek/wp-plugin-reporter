@@ -1,5 +1,10 @@
 /**
  * Plugin Reporter Admin CSS
+ *
+ * All of the CSS for your admin-specific functionality.
+ *
+ * @package    Plugin_Reporter
+ * @subpackage Plugin_Reporter/admin/css
  */
 
 /* Plugin summary cards */
@@ -29,6 +34,15 @@
 .summary-card h3 {
     margin-top: 0;
     margin-bottom: 10px;
+}
+
+.plugin-count {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.plugin-status-counts {
+    margin-top: 10px;
 }
 
 /* Status indicators */
@@ -68,6 +82,16 @@
     font-weight: 500;
 }
 
+.plugin-status-badge.active {
+    background: #e7f7e5;
+    border: 1px solid #8bcb81;
+}
+
+.plugin-status-badge.inactive {
+    background: #f7f7f7;
+    border: 1px solid #e0e0e0;
+}
+
 /* Row actions */
 .row-actions {
     color: #777;
@@ -103,12 +127,21 @@
 /* Export options */
 .plugin-reporter-export {
     margin-bottom: 20px;
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
 }
 
 .export-options {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-top: 15px;
+}
+
+.export-options .button .dashicons {
+    vertical-align: text-bottom;
+    margin-right: 5px;
 }
 
 /* Footer links */
@@ -116,4 +149,15 @@
     margin-top: 20px;
     font-size: 13px;
     color: #666;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 782px) {
+    .summary-cards {
+        flex-direction: column;
+    }
+    
+    .summary-card {
+        margin-bottom: 10px;
+    }
 }
