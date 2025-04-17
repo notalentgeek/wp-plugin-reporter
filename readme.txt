@@ -30,6 +30,18 @@ Plugin Reporter is a powerful tool for WordPress administrators that provides de
 * Keep track of plugin versions and update status
 * Simplify site handovers with complete plugin documentation
 
+### Coming Soon
+
+We're working on exciting new features for future releases:
+
+* **Performance Impact Assessment**: Measure how plugins affect your site speed
+* **File Size Analysis**: See how much disk space each plugin uses
+* **Plugin Dependency Detection**: Discover which plugins depend on others
+* **Vulnerability Scanning**: Check for known security issues
+* **Interactive Dashboard**: Visual representations of your plugin data
+* **Scheduled Reports**: Get plugin reports automatically by email
+* **PDF Export**: Create professional PDF documentation
+
 ### For Developers
 
 Plugin Reporter is built following WordPress coding standards and includes comprehensive unit tests. The exported JSON format is designed to be easily parsed and used in other tools or scripts.
@@ -67,6 +79,14 @@ No, Plugin Reporter is read-only. It only collects and reports information about
 = How often is update information refreshed? =
 
 The plugin uses WordPress's built-in update checking system, so update information is refreshed whenever WordPress checks for updates.
+
+= Should I run this plugin on my production site? =
+
+Yes, Plugin Reporter is safe to run on production sites as it's a read-only tool that only gathers information. Future features like performance impact assessment would be best run on staging environments first.
+
+= Will this plugin help identify performance issues? =
+
+The current version focuses on plugin information and updates. We're developing a Performance Impact Assessment feature for future releases that will help identify which plugins affect site performance.
 
 == Screenshots ==
 

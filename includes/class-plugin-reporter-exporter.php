@@ -49,9 +49,10 @@ class Plugin_Reporter_Exporter {
      *
      * @since    1.0.0
      * @param    bool    $include_update_info    Whether to include update information.
+     * @param    bool    $include_size_info      Whether to include size information.
      * @return   array   The array of plugin data.
      */
-    public function get_plugin_data( $include_update_info = true ) {
+    public function get_plugin_data( $include_update_info = true, $include_size_info = false ) {
         // Ensure we have access to WordPress plugin functions
         if ( ! function_exists( 'get_plugins' ) ) {
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -84,6 +85,14 @@ class Plugin_Reporter_Exporter {
                 $plugin_info['latest_version'] = $update_info['latest_version'];
             }
 
+            // Add size information if requested
+            if ( $include_size_info ) {
+                $size_data = $this->calculate_plugin_size( $plugin_path );
+                $plugin_info['size_bytes'] = $size_data['total_size'];
+                $plugin_info['size_human'] = $size_data['human_readable_size'];
+                $plugin_info['subdirectory_sizes'] = $size_data['subdirectories'];
+            }
+
             $plugin_data[] = $plugin_info;
         }
 
@@ -94,10 +103,11 @@ class Plugin_Reporter_Exporter {
      * Export plugin data as CSV.
      *
      * @since    1.0.0
-     * @return   string    The CSV data.
+     * @param    bool    $include_size_info    Whether to include size information.
+     * @return   string   The CSV data.
      */
-    public function export_as_csv() {
-        $plugin_data = $this->get_plugin_data();
+    public function export_as_csv( $include_size_info = false ) {
+        $plugin_data = $this->get_plugin_data( true, $include_size_info );
         $output = fopen( 'php://temp', 'r+' );
 
         // Build headers based on available fields
@@ -115,6 +125,11 @@ class Plugin_Reporter_Exporter {
         if ( isset( $plugin_data[0]['update_available'] ) ) {
             $headers[] = 'Update Available';
             $headers[] = 'Latest Version';
+        }
+
+        // Add size info headers if available
+        if ( $include_size_info ) {
+            $headers[] = 'Size';
         }
 
         // Add CSV headers
@@ -138,6 +153,11 @@ class Plugin_Reporter_Exporter {
                 $row[] = $plugin['latest_version'];
             }
 
+            // Add size info if available
+            if ( isset( $plugin['size_human'] ) ) {
+                $row[] = $plugin['size_human'];
+            }
+
             fputcsv( $output, $row, ',', '"', '\\' );
         }
 
@@ -152,10 +172,104 @@ class Plugin_Reporter_Exporter {
      * Export plugin data as JSON.
      *
      * @since    1.0.0
+     * @param    bool    $include_size_info    Whether to include size information.
      * @return   string    The JSON data.
      */
-    public function export_as_json() {
-        $plugin_data = $this->get_plugin_data();
+    public function export_as_json( $include_size_info = false ) {
+        $plugin_data = $this->get_plugin_data( true, $include_size_info );
         return wp_json_encode( $plugin_data, JSON_PRETTY_PRINT );
+    }
+
+    /**
+     * Calculate the size of a plugin directory
+     *
+     * @since    1.0.0
+     * @param    string    $plugin_path    The plugin main file path (relative to plugins directory)
+     * @return   array     Array containing total size and subdirectory breakdown
+     */
+    public function calculate_plugin_size( $plugin_path ) {
+        // Convert plugin file path to directory path
+        $directory = WP_PLUGIN_DIR . '/' . dirname( plugin_basename( $plugin_path ) );
+
+        // Initialize return array
+        $size_data = array(
+            'total_size' => 0,
+            'subdirectories' => array(),
+            'human_readable_size' => '',
+        );
+
+        // Check if directory exists
+        if ( ! is_dir( $directory ) ) {
+            return $size_data;
+        }
+
+        try {
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator( $directory, RecursiveDirectoryIterator::SKIP_DOTS )
+            );
+
+            // Track subdirectory sizes
+            $subdirectories = array();
+
+            // Calculate total size
+            foreach ( $iterator as $file ) {
+                if ( $file->isFile() ) {
+                    $size = $file->getSize();
+                    $size_data['total_size'] += $size;
+
+                    // Track subdirectory sizes
+                    $subdir = str_replace( $directory, '', $file->getPath() );
+                    $subdir = trim( $subdir, '/' );
+
+                    if ( empty( $subdir ) ) {
+                        $subdir = '/'; // Root directory
+                    }
+
+                    if ( ! isset( $subdirectories[ $subdir ] ) ) {
+                        $subdirectories[ $subdir ] = 0;
+                    }
+
+                    $subdirectories[ $subdir ] += $size;
+                }
+            }
+
+            // Sort subdirectories by size (largest first)
+            arsort( $subdirectories );
+
+            // Add to return data
+            $size_data['subdirectories'] = $subdirectories;
+            $size_data['human_readable_size'] = $this->format_file_size( $size_data['total_size'] );
+
+        } catch ( Exception $e ) {
+            // Handle any errors
+            error_log( 'Plugin Reporter error calculating plugin size: ' . $e->getMessage() );
+        }
+
+        return $size_data;
+    }
+
+    /**
+     * Format file size into human readable format
+     *
+     * @since    1.0.0
+     * @param    int       $bytes    File size in bytes
+     * @return   string    Formatted file size (e.g., "1.5 MB")
+     */
+    public function format_file_size( $bytes ) {
+        if ( $bytes >= 1073741824 ) {
+            $bytes = number_format( $bytes / 1073741824, 2 ) . ' GB';
+        } elseif ( $bytes >= 1048576 ) {
+            $bytes = number_format( $bytes / 1048576, 2 ) . ' MB';
+        } elseif ( $bytes >= 1024 ) {
+            $bytes = number_format( $bytes / 1024, 2 ) . ' KB';
+        } elseif ( $bytes > 1 ) {
+            $bytes = $bytes . ' bytes';
+        } elseif ( $bytes == 1 ) {
+            $bytes = $bytes . ' byte';
+        } else {
+            $bytes = '0 bytes';
+        }
+
+        return $bytes;
     }
 }
