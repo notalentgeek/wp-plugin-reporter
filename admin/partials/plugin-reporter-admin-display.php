@@ -1,6 +1,6 @@
 <?php
 /**
- * Provide a admin area view for the plugin
+ * Provide an admin area view for the plugin
  *
  * This file is used to markup the admin-facing aspects of the plugin.
  *
@@ -19,21 +19,21 @@ if ( ! defined( 'WPINC' ) ) {
 
 <div class="wrap">
     <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-    <p><?php _e( 'This tool provides comprehensive information about all installed plugins, including update status.', 'plugin-reporter' ); ?></p>
+    <p><?php esc_html_e( 'This tool provides comprehensive information about all installed plugins, including update status.', 'plugin-reporter' ); ?></p>
 
     <!-- Export options -->
-    <div class="plugin-reporter-export" style="margin-bottom: 20px; background: #fff; padding: 20px; border: 1px solid #ccd0d4; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
-        <h2 style="margin-top: 0;"><?php _e( 'Export Options', 'plugin-reporter' ); ?></h2>
-        <p><?php _e( 'Export plugin information in CSV or JSON format for documentation or analysis.', 'plugin-reporter' ); ?></p>
+    <div class="plugin-reporter-export">
+        <h2><?php esc_html_e( 'Export Options', 'plugin-reporter' ); ?></h2>
+        <p><?php esc_html_e( 'Export plugin information in CSV or JSON format for documentation or analysis.', 'plugin-reporter' ); ?></p>
 
-        <div style="display: flex; gap: 15px; margin-top: 15px;">
+        <div class="export-options">
             <!-- CSV Export -->
             <form method="post" action="">
                 <?php wp_nonce_field( 'plugin_reporter_export_csv', 'plugin_reporter_nonce' ); ?>
                 <input type="hidden" name="action" value="export_csv">
-                <button type="submit" class="button button-primary" style="padding: 0 15px;">
-                    <span class="dashicons dashicons-media-spreadsheet" style="vertical-align: text-bottom; margin-right: 5px;"></span>
-                    <?php _e( 'Export as CSV', 'plugin-reporter' ); ?>
+                <button type="submit" class="button button-primary">
+                    <span class="dashicons dashicons-media-spreadsheet"></span>
+                    <?php esc_html_e( 'Export as CSV', 'plugin-reporter' ); ?>
                 </button>
             </form>
 
@@ -41,9 +41,9 @@ if ( ! defined( 'WPINC' ) ) {
             <form method="post" action="">
                 <?php wp_nonce_field( 'plugin_reporter_export_json', 'plugin_reporter_json_nonce' ); ?>
                 <input type="hidden" name="action" value="export_json">
-                <button type="submit" class="button" style="padding: 0 15px;">
-                    <span class="dashicons dashicons-media-code" style="vertical-align: text-bottom; margin-right: 5px;"></span>
-                    <?php _e( 'Export as JSON', 'plugin-reporter' ); ?>
+                <button type="submit" class="button">
+                    <span class="dashicons dashicons-media-code"></span>
+                    <?php esc_html_e( 'Export as JSON', 'plugin-reporter' ); ?>
                 </button>
             </form>
         </div>
@@ -51,30 +51,30 @@ if ( ! defined( 'WPINC' ) ) {
 
     <!-- Summary section -->
     <div class="plugin-reporter-summary">
-        <h2><?php _e( 'Summary', 'plugin-reporter' ); ?></h2>
-        <div class="summary-cards" style="display: flex; gap: 20px;">
+        <h2><?php esc_html_e( 'Summary', 'plugin-reporter' ); ?></h2>
+        <div class="summary-cards">
 
             <!-- Total plugins card -->
-            <div class="summary-card" style="flex: 1; background: #f9f9f9; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <h3 style="margin-top: 0;"><?php _e( 'Total Plugins', 'plugin-reporter' ); ?></h3>
-                <div style="font-size: 24px; font-weight: bold;"><?php echo count( $plugins_data ); ?></div>
-                <div style="margin-top: 10px;">
-                    <span class="plugin-card active"><?php echo $active_count; ?> <?php _e( 'Active', 'plugin-reporter' ); ?></span>
-                    <span class="plugin-card inactive"><?php echo $inactive_count; ?> <?php _e( 'Inactive', 'plugin-reporter' ); ?></span>
+            <div class="summary-card">
+                <h3><?php esc_html_e( 'Total Plugins', 'plugin-reporter' ); ?></h3>
+                <div class="plugin-count"><?php echo esc_html( count( $plugins_data ) ); ?></div>
+                <div class="plugin-status-counts">
+                    <span class="plugin-card active"><?php echo esc_html( $active_count ); ?> <?php esc_html_e( 'Active', 'plugin-reporter' ); ?></span>
+                    <span class="plugin-card inactive"><?php echo esc_html( $inactive_count ); ?> <?php esc_html_e( 'Inactive', 'plugin-reporter' ); ?></span>
                 </div>
             </div>
 
             <!-- Updates card -->
-            <div class="summary-card" style="flex: 1; background: #f9f9f9; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <h3 style="margin-top: 0;"><?php _e( 'Updates Available', 'plugin-reporter' ); ?></h3>
-                <div style="font-size: 24px; font-weight: bold; <?php echo ( $update_count > 0 ? 'color: #d54e21;' : 'color: #46b450;' ); ?>">
-                    <?php echo $update_count; ?>
+            <div class="summary-card">
+                <h3><?php esc_html_e( 'Updates Available', 'plugin-reporter' ); ?></h3>
+                <div class="update-count <?php echo esc_attr( $update_count > 0 ? 'update-available' : 'up-to-date' ); ?>">
+                    <?php echo esc_html( $update_count ); ?>
                 </div>
-                <div style="margin-top: 10px;">
+                <div class="update-status">
                     <?php if ( $update_count > 0 ) : ?>
-                        <p><?php _e( 'Some plugins need updates. See details below.', 'plugin-reporter' ); ?></p>
+                        <p><?php esc_html_e( 'Some plugins need updates. See details below.', 'plugin-reporter' ); ?></p>
                     <?php else : ?>
-                        <p><?php _e( 'All plugins are up to date.', 'plugin-reporter' ); ?></p>
+                        <p><?php esc_html_e( 'All plugins are up to date.', 'plugin-reporter' ); ?></p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -83,25 +83,26 @@ if ( ! defined( 'WPINC' ) ) {
     </div>
 
     <!-- Plugin details with tabbed interface -->
-    <div class="plugin-reporter-tabs" style="margin-top: 20px;">
-        <h2 style="margin-bottom: 10px;"><?php _e( 'Plugin Details', 'plugin-reporter' ); ?></h2>
+    <div class="plugin-reporter-tabs">
+        <h2><?php esc_html_e( 'Plugin Details', 'plugin-reporter' ); ?></h2>
 
         <nav class="nav-tab-wrapper wp-clearfix">
+            <a href="#all-plugins" class="nav-tab nav-tab-active" id="tab-all-plugins"><?php esc_html_e( 'All Plugins', 'plugin-reporter' ); ?></a>
             <?php if ( $update_count > 0 ) : ?>
-                <a href="#needs-update" class="nav-tab nav-tab-active" id="tab-needs-update"><?php _e( 'Needs Update', 'plugin-reporter' ); ?> <span class="update-count"><?php echo $update_count; ?></span></a>
+                <a href="#needs-update" class="nav-tab" id="tab-needs-update"><?php esc_html_e( 'Needs Update', 'plugin-reporter' ); ?> <span class="update-count"><?php echo esc_html( $update_count ); ?></span></a>
             <?php endif; ?>
         </nav>
 
-        <!-- Plugin listing (previously in All plugins tab but now shown directly) -->
-        <div id="plugin-listing" class="plugin-content" style="display: block;">
+        <!-- All plugins tab -->
+        <div id="all-plugins" class="tab-content">
             <table class="wp-list-table widefat fixed striped">
                 <thead>
                     <tr>
-                        <th style="width: 30%;"><?php _e( 'Plugin', 'plugin-reporter' ); ?></th>
-                        <th style="width: 100px;"><?php _e( 'Status', 'plugin-reporter' ); ?></th>
-                        <th style="width: 15%;"><?php _e( 'Current Version', 'plugin-reporter' ); ?></th>
-                        <th style="width: 15%;"><?php _e( 'Latest Version', 'plugin-reporter' ); ?></th>
-                        <th style="width: 15%;"><?php _e( 'Update Available', 'plugin-reporter' ); ?></th>
+                        <th style="width: 30%;"><?php esc_html_e( 'Plugin', 'plugin-reporter' ); ?></th>
+                        <th style="width: 100px;"><?php esc_html_e( 'Status', 'plugin-reporter' ); ?></th>
+                        <th style="width: 15%;"><?php esc_html_e( 'Current Version', 'plugin-reporter' ); ?></th>
+                        <th style="width: 15%;"><?php esc_html_e( 'Latest Version', 'plugin-reporter' ); ?></th>
+                        <th style="width: 15%;"><?php esc_html_e( 'Update Available', 'plugin-reporter' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -130,19 +131,19 @@ if ( ! defined( 'WPINC' ) ) {
                                 </div>
                             </td>
                             <td>
-                                <span class="plugin-status-badge" style="background-color: <?php echo $plugin['is_active'] ? '#e7f7e5' : '#f7f7f7'; ?>; border: 1px solid <?php echo $plugin['is_active'] ? '#8bcb81' : '#e0e0e0'; ?>;">
+                                <span class="plugin-status-badge <?php echo esc_attr( $plugin['is_active'] ? 'active' : 'inactive' ); ?>">
                                     <?php echo esc_html( $plugin['status'] ); ?>
                                 </span>
                             </td>
                             <td><?php echo esc_html( $plugin['version'] ); ?></td>
-                            <td style="<?php echo $plugin['update_available'] ? 'color: #d54e21; font-weight: bold;' : ''; ?>">
+                            <td class="<?php echo esc_attr( $plugin['update_available'] ? 'update-available' : '' ); ?>">
                                 <?php echo esc_html( $plugin['latest_version'] ); ?>
                             </td>
                             <td>
                                 <?php if ( $plugin['update_available'] ) : ?>
-                                    <span class="update-available"><?php _e( 'Yes', 'plugin-reporter' ); ?></span>
+                                    <span class="update-available"><?php esc_html_e( 'Yes', 'plugin-reporter' ); ?></span>
                                 <?php else : ?>
-                                    <span class="up-to-date"><?php _e( 'No', 'plugin-reporter' ); ?></span>
+                                    <span class="up-to-date"><?php esc_html_e( 'No', 'plugin-reporter' ); ?></span>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -157,10 +158,10 @@ if ( ! defined( 'WPINC' ) ) {
                 <table class="wp-list-table widefat fixed striped">
                     <thead>
                         <tr>
-                            <th style="width: 30%;"><?php _e( 'Plugin', 'plugin-reporter' ); ?></th>
-                            <th style="width: 100px;"><?php _e( 'Status', 'plugin-reporter' ); ?></th>
-                            <th style="width: 15%;"><?php _e( 'Current Version', 'plugin-reporter' ); ?></th>
-                            <th style="width: 15%;"><?php _e( 'Latest Version', 'plugin-reporter' ); ?></th>
+                            <th style="width: 30%;"><?php esc_html_e( 'Plugin', 'plugin-reporter' ); ?></th>
+                            <th style="width: 100px;"><?php esc_html_e( 'Status', 'plugin-reporter' ); ?></th>
+                            <th style="width: 15%;"><?php esc_html_e( 'Current Version', 'plugin-reporter' ); ?></th>
+                            <th style="width: 15%;"><?php esc_html_e( 'Latest Version', 'plugin-reporter' ); ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -190,12 +191,12 @@ if ( ! defined( 'WPINC' ) ) {
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="plugin-status-badge" style="background-color: <?php echo $plugin['is_active'] ? '#e7f7e5' : '#f7f7f7'; ?>; border: 1px solid <?php echo $plugin['is_active'] ? '#8bcb81' : '#e0e0e0'; ?>;">
+                                    <span class="plugin-status-badge <?php echo esc_attr( $plugin['is_active'] ? 'active' : 'inactive' ); ?>">
                                         <?php echo esc_html( $plugin['status'] ); ?>
                                     </span>
                                 </td>
                                 <td><?php echo esc_html( $plugin['version'] ); ?></td>
-                                <td style="color: #d54e21; font-weight: bold;">
+                                <td class="update-available">
                                     <?php echo esc_html( $plugin['latest_version'] ); ?>
                                 </td>
                             </tr>
@@ -207,12 +208,13 @@ if ( ! defined( 'WPINC' ) ) {
     </div>
 
     <!-- Footer with links -->
-    <div style="margin-top: 20px; font-size: 13px; color: #666;">
+    <div class="plugin-reporter-footer">
         <p>
             <?php
             printf(
-                __( 'Go to <a href="%s">WordPress Updates</a> to perform updates.', 'plugin-reporter' ),
-                admin_url( 'update-core.php' )
+                // translators: %s: URL to WordPress Updates page
+                esc_html__( 'Go to %s to perform updates.', 'plugin-reporter' ),
+                '<a href="' . esc_url( admin_url( 'update-core.php' ) ) . '">' . esc_html__( 'WordPress Updates', 'plugin-reporter' ) . '</a>'
             );
             ?>
         </p>
@@ -226,7 +228,7 @@ if ( ! defined( 'WPINC' ) ) {
             e.preventDefault();
 
             // Hide all tabs
-            $('.tab-content, .plugin-content').hide();
+            $('.tab-content').hide();
 
             // Show the selected tab
             $($(this).attr('href')).show();
@@ -236,9 +238,8 @@ if ( ! defined( 'WPINC' ) ) {
             $(this).addClass('nav-tab-active');
         });
 
-        // If no active tab, show the plugin listing by default
-        if ($('.nav-tab-active').length === 0) {
-            $('#plugin-listing').show();
-        }
+        // Show the first tab by default
+        $('#all-plugins').show();
+        $('#needs-update').hide();
     });
 </script>
