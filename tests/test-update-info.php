@@ -6,6 +6,9 @@
  * @subpackage Plugin_Reporter/tests
  */
 
+/**
+ * Test class for Plugin_Reporter_Update_Info
+ */
 class Test_Plugin_Reporter_Update_Info extends WP_UnitTestCase {
 
     /**
@@ -17,6 +20,8 @@ class Test_Plugin_Reporter_Update_Info extends WP_UnitTestCase {
 
     /**
      * Set up the test fixture.
+     *
+     * @return void
      */
     public function setUp(): void {
         parent::setUp();
@@ -30,6 +35,8 @@ class Test_Plugin_Reporter_Update_Info extends WP_UnitTestCase {
 
     /**
      * Test that the class exists.
+     *
+     * @return void
      */
     public function test_class_exists() {
         $this->assertTrue( class_exists( 'Plugin_Reporter_Update_Info' ), 'Update info class should exist' );
@@ -37,6 +44,8 @@ class Test_Plugin_Reporter_Update_Info extends WP_UnitTestCase {
 
     /**
      * Test that the test method works.
+     *
+     * @return void
      */
     public function test_test_method() {
         $result = $this->update_info->test_method();
@@ -45,6 +54,8 @@ class Test_Plugin_Reporter_Update_Info extends WP_UnitTestCase {
 
     /**
      * Test refresh_update_data method.
+     *
+     * @return void
      */
     public function test_refresh_update_data() {
         $this->update_info->refresh_update_data();
@@ -55,6 +66,8 @@ class Test_Plugin_Reporter_Update_Info extends WP_UnitTestCase {
 
     /**
      * Test get_plugin_update_info method.
+     *
+     * @return void
      */
     public function test_get_plugin_update_info() {
         // Test with our own plugin
@@ -75,6 +88,8 @@ class Test_Plugin_Reporter_Update_Info extends WP_UnitTestCase {
 
     /**
      * Tear down the test fixture.
+     *
+     * @return void
      */
     public function tearDown(): void {
         parent::tearDown();
@@ -95,6 +110,8 @@ class Test_Plugin_Reporter_Update_Info_Override extends Plugin_Reporter_Update_I
 
     /**
      * Override to avoid WordPress API calls
+     * 
+     * @return void
      */
     public function refresh_update_data() {
         // Do nothing - this is a test override
@@ -102,6 +119,9 @@ class Test_Plugin_Reporter_Update_Info_Override extends Plugin_Reporter_Update_I
 
     /**
      * Override to return test data
+     *
+     * @param string $plugin_file The plugin file path
+     * @return array Test update information
      */
     public function get_plugin_update_info( $plugin_file ) {
         return array(

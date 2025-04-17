@@ -6,6 +6,9 @@
  * @subpackage Plugin_Reporter/tests
  */
 
+/**
+ * Test class for Plugin_Reporter_Exporter
+ */
 class Test_Plugin_Reporter_Exporter extends WP_UnitTestCase {
 
     /**
@@ -17,8 +20,10 @@ class Test_Plugin_Reporter_Exporter extends WP_UnitTestCase {
 
     /**
      * Set up the test fixture.
+     *
+     * @return void
      */
-    public function setUp(): void {  // Added ": void" return type here
+    public function setUp(): void {
         parent::setUp();
 
         // Make sure exporter class is loaded
@@ -28,6 +33,8 @@ class Test_Plugin_Reporter_Exporter extends WP_UnitTestCase {
 
     /**
      * Test that we can get plugin data.
+     *
+     * @return void
      */
     public function test_get_plugin_data() {
         $data = $this->exporter->get_plugin_data();
@@ -53,6 +60,8 @@ class Test_Plugin_Reporter_Exporter extends WP_UnitTestCase {
 
     /**
      * Test that we can export plugin data as CSV.
+     *
+     * @return void
      */
     public function test_export_as_csv() {
         $csv = $this->exporter->export_as_csv();
@@ -68,6 +77,8 @@ class Test_Plugin_Reporter_Exporter extends WP_UnitTestCase {
 
     /**
      * Test that we can export plugin data as JSON.
+     *
+     * @return void
      */
     public function test_export_as_json() {
         $json = $this->exporter->export_as_json();
@@ -86,8 +97,10 @@ class Test_Plugin_Reporter_Exporter extends WP_UnitTestCase {
 
     /**
      * Tear down the test fixture.
+     *
+     * @return void
      */
-    public function tearDown(): void {  // Also added ": void" return type here
+    public function tearDown(): void {
         parent::tearDown();
         $this->exporter = null;
     }
