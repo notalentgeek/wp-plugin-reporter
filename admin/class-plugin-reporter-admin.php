@@ -144,12 +144,21 @@ class Plugin_Reporter_Admin {
         $active_count = 0;
         $inactive_count = 0;
         $update_count = 0;
+        $total_size_bytes = 0;
 
         // Get plugin data with update info
         $plugins_data = array();
         foreach ( $all_plugins as $plugin_file => $plugin ) {
             $is_active = in_array( $plugin_file, $active_plugins, true );
             $update_info = $this->update_info->get_plugin_update_info( $plugin_file );
+
+            // Get plugin size information
+            $size_data = $this->exporter->get_plugin_size( $plugin_file );
+            $size_bytes = $size_data['total_size'];
+            $size_human = $size_data['human_readable_size'];
+
+            // Add to total size
+            $total_size_bytes += $size_bytes;
 
             // Count status
             if ( $is_active ) {
@@ -174,86 +183,111 @@ class Plugin_Reporter_Admin {
                 'version'          => $plugin['Version'],
                 'current_version'  => $update_info['current_version'],
                 'latest_version'   => $update_info['latest_version'],
-                'update_available' => $update_info['update_available']
+                'update_available' => $update_info['update_available'],
+                'size_bytes'       => $size_bytes,
+                'size_human'       => $size_human
             );
         }
+
+        // Format total size
+        $total_size_formatted = $this->exporter->format_file_size( $total_size_bytes );
 
         // Include the admin display
         include_once PLUGIN_REPORTER_PATH . 'admin/partials/plugin-reporter-admin-display.php';
     }
 
     /**
-     * Process export requests.
+     * Process export request
      *
      * @since    1.0.0
      */
     public function process_export() {
-        // CSV Export
-        if ( isset( $_POST['action'] ) && 'export_csv' === $_POST['action'] ) {
-            // Verify nonce
-            if ( ! isset( $_POST['plugin_reporter_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['plugin_reporter_nonce'] ) ), 'plugin_reporter_export_csv' ) ) {
-                wp_die( esc_html__( 'Security check failed. Please try again.', 'plugin-reporter' ) );
+        // Check if this is an export action
+        if ( isset( $_POST['action'] ) ) {
+            $action = sanitize_text_field( wp_unslash( $_POST['action'] ) );
+
+            if ( 'export_csv' === $action ) {
+                // Verify CSV export nonce
+                if ( ! isset( $_POST['plugin_reporter_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['plugin_reporter_nonce'] ) ), 'plugin_reporter_export_csv' ) ) {
+                    wp_die( 'Security check failed' );
+                }
+
+                $include_size = isset( $_POST['include_size'] ) ? (bool) $_POST['include_size'] : false;
+                $data = $this->exporter->export_as_csv( $include_size );
+                $filename = 'plugin-report-' . date( 'Y-m-d' ) . '.csv';
+                $content_type = 'text/csv';
+
+                // Output headers and data
+                header( 'Content-Type: ' . $content_type );
+                header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+                header( 'Cache-Control: no-cache, no-store, must-revalidate' );
+                header( 'Pragma: no-cache' );
+                header( 'Expires: 0' );
+                echo $data; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                exit;
             }
 
-            // Check capabilities
-            if ( ! current_user_can( 'manage_options' ) ) {
-                wp_die( esc_html__( 'You do not have permission to export plugin data.', 'plugin-reporter' ) );
+            if ( 'export_json' === $action ) {
+                // Verify JSON export nonce
+                if ( ! isset( $_POST['plugin_reporter_json_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['plugin_reporter_json_nonce'] ) ), 'plugin_reporter_export_json' ) ) {
+                    wp_die( 'Security check failed' );
+                }
+
+                $include_size = isset( $_POST['include_size'] ) ? (bool) $_POST['include_size'] : false;
+                $data = $this->exporter->export_as_json( $include_size );
+                $filename = 'plugin-report-' . date( 'Y-m-d' ) . '.json';
+                $content_type = 'application/json';
+
+                // Output headers and data
+                header( 'Content-Type: ' . $content_type );
+                header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+                header( 'Cache-Control: no-cache, no-store, must-revalidate' );
+                header( 'Pragma: no-cache' );
+                header( 'Expires: 0' );
+                echo $data; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                exit;
             }
+        }
+    }
 
-            // Turn off error reporting for this process
-            $original_error_reporting = error_reporting();
-            $original_display_errors = ini_get('display_errors');
-            error_reporting(0);
-            ini_set('display_errors', 0);
+    /**
+     * Render the admin page
+     *
+     * @since    1.0.0
+     */
+    public function render_admin_page() {
+        // Get plugin data with size information
+        $exporter = new Plugin_Reporter_Exporter();
+        $plugins = $exporter->get_plugin_data( true, true );
 
-            // Set headers for CSV download
-            header( 'Content-Type: text/csv; charset=utf-8' );
-            header( 'Content-Disposition: attachment; filename=plugin-report-' . date( 'Y-m-d' ) . '.csv' );
-            header( 'Pragma: no-cache' );
-            header( 'Expires: 0' );
+        // Calculate summary statistics including file size
+        $total_plugins = count( $plugins );
+        $active_plugins = count( array_filter( $plugins, function( $plugin ) {
+            return 'active' === $plugin['status'];
+        }));
+        $inactive_plugins = $total_plugins - $active_plugins;
 
-            // Output CSV data
-            echo $this->exporter->export_as_csv();
+        // Calculate total size
+        $total_size_bytes = array_reduce( $plugins, function( $carry, $plugin ) {
+            return $carry + (isset($plugin['size_bytes']) ? $plugin['size_bytes'] : 0);
+        }, 0);
+        $total_size_formatted = $exporter->format_file_size( $total_size_bytes );
 
-            // Restore original error reporting settings
-            error_reporting($original_error_reporting);
-            ini_set('display_errors', $original_display_errors);
+        // Sort plugins by size if requested
+        if ( isset( $_GET['orderby'] ) && 'size' === $_GET['orderby'] ) {
+            usort( $plugins, function( $a, $b ) {
+                $size_a = isset( $a['size_bytes'] ) ? $a['size_bytes'] : 0;
+                $size_b = isset( $b['size_bytes'] ) ? $b['size_bytes'] : 0;
 
-            exit;
+                if ( isset( $_GET['order'] ) && 'asc' === $_GET['order'] ) {
+                    return $size_a - $size_b;
+                }
+
+                return $size_b - $size_a; // Default to descending
+            });
         }
 
-        // JSON Export
-        if ( isset( $_POST['action'] ) && 'export_json' === $_POST['action'] ) {
-            // Verify nonce
-            if ( ! isset( $_POST['plugin_reporter_json_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['plugin_reporter_json_nonce'] ) ), 'plugin_reporter_export_json' ) ) {
-                wp_die( esc_html__( 'Security check failed. Please try again.', 'plugin-reporter' ) );
-            }
-
-            // Check capabilities
-            if ( ! current_user_can( 'manage_options' ) ) {
-                wp_die( esc_html__( 'You do not have permission to export plugin data.', 'plugin-reporter' ) );
-            }
-
-            // Turn off error reporting for this process
-            $original_error_reporting = error_reporting();
-            $original_display_errors = ini_get('display_errors');
-            error_reporting(0);
-            ini_set('display_errors', 0);
-
-            // Set headers for JSON download
-            header( 'Content-Type: application/json; charset=utf-8' );
-            header( 'Content-Disposition: attachment; filename=plugin-report-' . date( 'Y-m-d' ) . '.json' );
-            header( 'Pragma: no-cache' );
-            header( 'Expires: 0' );
-
-            // Output JSON data
-            echo $this->exporter->export_as_json();
-
-            // Restore original error reporting settings
-            error_reporting($original_error_reporting);
-            ini_set('display_errors', $original_display_errors);
-
-            exit;
-        }
+        // Include the view file
+        include plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/plugin-reporter-admin-display.php';
     }
 }
