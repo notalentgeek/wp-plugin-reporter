@@ -34,6 +34,8 @@ class Plugin_Reporter_Exporter {
 
     /**
      * Constructor
+     *
+     * @since    1.0.0
      */
     public function __construct() {
         // Initialize the update info object if available
@@ -47,7 +49,7 @@ class Plugin_Reporter_Exporter {
      *
      * @since    1.0.0
      * @param    bool    $include_update_info    Whether to include update information.
-     * @return   array    The array of plugin data.
+     * @return   array   The array of plugin data.
      */
     public function get_plugin_data( $include_update_info = true ) {
         // Ensure we have access to WordPress plugin functions
@@ -66,12 +68,12 @@ class Plugin_Reporter_Exporter {
 
             // Build plugin data array
             $plugin_info = array(
-                'name' => $plugin['Name'],
-                'version' => $plugin['Version'],
-                'status' => $status,
+                'name'        => $plugin['Name'],
+                'version'     => $plugin['Version'],
+                'status'      => $status,
                 'description' => $plugin['Description'],
-                'author' => $plugin['Author'],
-                'plugin_uri' => isset( $plugin['PluginURI'] ) ? $plugin['PluginURI'] : '',
+                'author'      => $plugin['Author'],
+                'plugin_uri'  => isset( $plugin['PluginURI'] ) ? $plugin['PluginURI'] : '',
                 'plugin_path' => $plugin_path,
             );
 
