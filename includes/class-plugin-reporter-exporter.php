@@ -100,6 +100,60 @@ class Plugin_Reporter_Exporter {
     }
 
     /**
+     * Get cached plugin size or calculate if not cached
+     *
+     * @since    1.0.0
+     * @param    string    $plugin_path    The plugin main file path
+     * @return   array     Size information array
+     */
+    public function get_plugin_size( $plugin_path ) {
+        // Create a cache key specific to this plugin
+        $cache_key = 'plugin_reporter_size_' . sanitize_key( $plugin_path );
+
+        // Try to get from cache first
+        $cached_size = get_transient( $cache_key );
+        if ( false !== $cached_size ) {
+            return $cached_size;
+        }
+
+        // If not in cache, calculate size
+        $size_data = $this->calculate_plugin_size( $plugin_path );
+
+        // Store in cache for 24 hours (86400 seconds)
+        // You can adjust this time as needed
+        set_transient( $cache_key, $size_data, 86400 );
+
+        return $size_data;
+    }
+
+    /**
+     * Clear plugin size cache
+     *
+     * @since    1.0.0
+     * @param    string    $plugin_path    Optional. Clear specific plugin cache, or all if null.
+     * @return   void
+     */
+    public function clear_plugin_size_cache( $plugin_path = null ) {
+        if ( null === $plugin_path ) {
+            // Clear all plugin size caches
+            global $wpdb;
+            $wpdb->query(
+                $wpdb->prepare(
+                    "DELETE FROM $wpdb->options WHERE option_name LIKE %s",
+                    $wpdb->esc_like( '_transient_plugin_reporter_size_' ) . '%'
+                )
+            );
+
+            // Also clear expired transients
+            delete_expired_transients();
+        } else {
+            // Clear specific plugin cache
+            $cache_key = 'plugin_reporter_size_' . sanitize_key( $plugin_path );
+            delete_transient( $cache_key );
+        }
+    }
+
+    /**
      * Export plugin data as CSV.
      *
      * @since    1.0.0
