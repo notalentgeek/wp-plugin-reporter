@@ -155,6 +155,13 @@
     gap: 8px;
 }
 
+/* Target the specific label in the sort controls */
+label[for="sort-plugins"] {
+    font-size: 12px;
+    font-weight: normal;
+    color: #646970;
+}
+
 .sort-select {
     padding: 4px 24px 4px 8px;
     line-height: 1.4;
