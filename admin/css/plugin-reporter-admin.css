@@ -135,13 +135,47 @@
 
 .export-options {
     display: flex;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 15px;
 }
 
 .export-options .button .dashicons {
     vertical-align: text-bottom;
     margin-right: 5px;
+}
+
+.export-option-checkbox {
+    margin-bottom: 15px;
+}
+
+.export-option-checkbox label {
+    font-weight: 500;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.export-options form {
+    margin: 0;
+}
+
+/* Sort controls */
+.plugin-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sort-select {
+    padding: 4px 24px 4px 8px;
+    line-height: 1.4;
+    min-height: 30px;
+    max-width: 25rem;
 }
 
 /* Footer links */
@@ -156,8 +190,17 @@
     .summary-cards {
         flex-direction: column;
     }
-    
+
     .summary-card {
         margin-bottom: 10px;
+    }
+
+    .plugin-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sort-controls {
+        margin-top: 10px;
     }
 }

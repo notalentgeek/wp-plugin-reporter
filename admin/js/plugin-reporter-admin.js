@@ -32,6 +32,26 @@
         // Show the first tab by default
         $('#all-plugins').show();
         $('#needs-update').hide();
+
+        // Handle checkbox toggle for both export forms
+        $('#include_size_toggle').on('change', function() {
+            var isChecked = $(this).is(':checked');
+            $('#include_size_csv, #include_size_json').val(isChecked ? '1' : '0');
+        });
+
+        // Handle sort select change
+        $('#sort-plugins').on('change', function() {
+            var sortValue = $(this).val();
+            var currentUrl = window.location.href;
+
+            // Remove existing sort parameter if it exists
+            currentUrl = currentUrl.replace(/&sort=[^&]*/, '');
+            currentUrl = currentUrl.replace(/\?sort=[^&]*&/, '?');
+
+            // Add the new sort parameter
+            var separator = currentUrl.indexOf('?') !== -1 ? '&' : '?';
+            window.location.href = currentUrl + separator + 'sort=' + sortValue;
+        });
     });
 
 })( jQuery );

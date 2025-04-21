@@ -15,6 +15,9 @@
 if ( ! defined( 'WPINC' ) ) {
     die;
 }
+
+// Get sort order
+$sort_by = isset( $_GET['sort'] ) ? sanitize_text_field( wp_unslash( $_GET['sort'] ) ) : 'default';
 ?>
 
 <div class="wrap">
@@ -26,16 +29,20 @@ if ( ! defined( 'WPINC' ) ) {
         <h2><?php esc_html_e( 'Export Options', 'plugin-reporter' ); ?></h2>
         <p><?php esc_html_e( 'Export plugin information in CSV or JSON format for documentation or analysis.', 'plugin-reporter' ); ?></p>
 
+        <!-- Single checkbox for file size data -->
+        <div class="export-option-checkbox">
+            <label>
+                <input type="checkbox" id="include_size_toggle" value="1">
+                <?php esc_html_e( 'Include file size data', 'plugin-reporter' ); ?>
+            </label>
+        </div>
+
         <div class="export-options">
             <!-- CSV Export -->
             <form method="post" action="">
                 <?php wp_nonce_field( 'plugin_reporter_export_csv', 'plugin_reporter_nonce' ); ?>
                 <input type="hidden" name="action" value="export_csv">
-                <!-- Add size option -->
-                <label>
-                    <input type="checkbox" name="include_size" value="1" checked>
-                    <?php esc_html_e( 'Include file size data', 'plugin-reporter' ); ?>
-                </label>
+                <input type="hidden" name="include_size" id="include_size_csv" value="0">
                 <button type="submit" class="button button-primary">
                     <span class="dashicons dashicons-media-spreadsheet"></span>
                     <?php esc_html_e( 'Export as CSV', 'plugin-reporter' ); ?>
@@ -46,12 +53,8 @@ if ( ! defined( 'WPINC' ) ) {
             <form method="post" action="">
                 <?php wp_nonce_field( 'plugin_reporter_export_json', 'plugin_reporter_json_nonce' ); ?>
                 <input type="hidden" name="action" value="export_json">
-                <!-- Add size option -->
-                <label>
-                    <input type="checkbox" name="include_size" value="1" checked>
-                    <?php esc_html_e( 'Include file size data', 'plugin-reporter' ); ?>
-                </label>
-                <button type="submit" class="button">
+                <input type="hidden" name="include_size" id="include_size_json" value="0">
+                <button type="submit" class="button button-primary">
                     <span class="dashicons dashicons-media-code"></span>
                     <?php esc_html_e( 'Export as JSON', 'plugin-reporter' ); ?>
                 </button>
@@ -103,14 +106,24 @@ if ( ! defined( 'WPINC' ) ) {
 
     <!-- Plugin details with tabbed interface -->
     <div class="plugin-reporter-tabs">
-        <h2><?php esc_html_e( 'Plugin Details', 'plugin-reporter' ); ?></h2>
+        <h2 class="plugin-section-header">
+            <?php esc_html_e( 'Plugin Details', 'plugin-reporter' ); ?>
+            <div class="sort-controls">
+                <label for="sort-plugins"><?php esc_html_e( 'Sort by:', 'plugin-reporter' ); ?></label>
+                <select id="sort-plugins" class="sort-select">
+                    <option value="default" <?php selected( $sort_by, 'default' ); ?>><?php esc_html_e( 'Update Status', 'plugin-reporter' ); ?></option>
+                    <option value="size" <?php selected( $sort_by, 'size' ); ?>><?php esc_html_e( 'Size (largest first)', 'plugin-reporter' ); ?></option>
+                    <option value="name" <?php selected( $sort_by, 'name' ); ?>><?php esc_html_e( 'Name (A-Z)', 'plugin-reporter' ); ?></option>
+                    <option value="status" <?php selected( $sort_by, 'status' ); ?>><?php esc_html_e( 'Status', 'plugin-reporter' ); ?></option>
+                </select>
+            </div>
+        </h2>
 
         <nav class="nav-tab-wrapper wp-clearfix">
             <a href="#all-plugins" class="nav-tab nav-tab-active" id="tab-all-plugins"><?php esc_html_e( 'All Plugins', 'plugin-reporter' ); ?></a>
             <?php if ( $update_count > 0 ) : ?>
                 <a href="#needs-update" class="nav-tab" id="tab-needs-update"><?php esc_html_e( 'Needs Update', 'plugin-reporter' ); ?> <span class="update-count"><?php echo esc_html( $update_count ); ?></span></a>
             <?php endif; ?>
-            <a href="#by-size" class="nav-tab" id="tab-by-size"><?php esc_html_e( 'By Size', 'plugin-reporter' ); ?></a>
         </nav>
 
         <!-- All plugins tab -->
@@ -128,21 +141,54 @@ if ( ! defined( 'WPINC' ) ) {
                 </thead>
                 <tbody>
                     <?php
-                    // Sort plugins - updates first, then active, then alphabetical
-                    usort( $plugins_data, function( $a, $b ) {
-                        // First sort by update availability
-                        if ( $a['update_available'] && ! $b['update_available'] ) return -1;
-                        if ( ! $a['update_available'] && $b['update_available'] ) return 1;
+                    // Create a copy of plugins data for sorting
+                    $sorted_plugins = $plugins_data;
 
-                        // Then by active status
-                        if ( $a['is_active'] && ! $b['is_active'] ) return -1;
-                        if ( ! $a['is_active'] && $b['is_active'] ) return 1;
+                    // Sort plugins based on the selected criteria
+                    switch ( $sort_by ) {
+                        case 'size':
+                            // Sort by size (largest first)
+                            usort( $sorted_plugins, function( $a, $b ) {
+                                $size_a = isset( $a['size_bytes'] ) ? $a['size_bytes'] : 0;
+                                $size_b = isset( $b['size_bytes'] ) ? $b['size_bytes'] : 0;
+                                return $size_b - $size_a;
+                            });
+                            break;
 
-                        // Finally by name
-                        return strcasecmp( $a['name'], $b['name'] );
-                    });
+                        case 'name':
+                            // Sort by name (A-Z)
+                            usort( $sorted_plugins, function( $a, $b ) {
+                                return strcasecmp( $a['name'], $b['name'] );
+                            });
+                            break;
 
-                    foreach ( $plugins_data as $plugin ) :
+                        case 'status':
+                            // Sort by status (active first)
+                            usort( $sorted_plugins, function( $a, $b ) {
+                                if ( $a['is_active'] && ! $b['is_active'] ) return -1;
+                                if ( ! $a['is_active'] && $b['is_active'] ) return 1;
+                                return strcasecmp( $a['name'], $b['name'] );
+                            });
+                            break;
+
+                        default:
+                            // Default sort: updates first, then active, then alphabetical
+                            usort( $sorted_plugins, function( $a, $b ) {
+                                // First sort by update availability
+                                if ( $a['update_available'] && ! $b['update_available'] ) return -1;
+                                if ( ! $a['update_available'] && $b['update_available'] ) return 1;
+
+                                // Then by active status
+                                if ( $a['is_active'] && ! $b['is_active'] ) return -1;
+                                if ( ! $a['is_active'] && $b['is_active'] ) return 1;
+
+                                // Finally by name
+                                return strcasecmp( $a['name'], $b['name'] );
+                            });
+                            break;
+                    }
+
+                    foreach ( $sorted_plugins as $plugin ) :
                     ?>
                         <tr>
                             <td>
@@ -233,53 +279,6 @@ if ( ! defined( 'WPINC' ) ) {
                 </table>
             </div>
         <?php endif; ?>
-
-        <!-- By Size tab -->
-        <div id="by-size" class="tab-content" style="display: none;">
-            <table class="wp-list-table widefat fixed striped">
-                <thead>
-                    <tr>
-                        <th style="width: 30%;"><?php esc_html_e( 'Plugin', 'plugin-reporter' ); ?></th>
-                        <th style="width: 100px;"><?php esc_html_e( 'Status', 'plugin-reporter' ); ?></th>
-                        <th style="width: 15%;"><?php esc_html_e( 'Version', 'plugin-reporter' ); ?></th>
-                        <th style="width: 15%;"><?php esc_html_e( 'Size', 'plugin-reporter' ); ?></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    // Create a copy of plugins data for size sorting
-                    $plugins_by_size = $plugins_data;
-
-                    // Sort plugins by size (largest first)
-                    usort( $plugins_by_size, function( $a, $b ) {
-                        $size_a = isset( $a['size_bytes'] ) ? $a['size_bytes'] : 0;
-                        $size_b = isset( $b['size_bytes'] ) ? $b['size_bytes'] : 0;
-                        return $size_b - $size_a;
-                    });
-
-                    foreach ( $plugins_by_size as $plugin ) :
-                    ?>
-                        <tr>
-                            <td>
-                                <strong><?php echo esc_html( $plugin['name'] ); ?></strong>
-                                <div class="row-actions">
-                                    <span class="description"><?php echo esc_html( wp_trim_words( $plugin['description'], 20 ) ); ?></span>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="plugin-status-badge <?php echo esc_attr( $plugin['is_active'] ? 'active' : 'inactive' ); ?>">
-                                    <?php echo esc_html( $plugin['status'] ); ?>
-                                </span>
-                            </td>
-                            <td><?php echo esc_html( $plugin['version'] ); ?></td>
-                            <td>
-                                <?php echo isset( $plugin['size_human'] ) ? esc_html( $plugin['size_human'] ) : esc_html__( 'Unknown', 'plugin-reporter' ); ?>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
     </div>
 
     <!-- Footer with links -->
@@ -295,27 +294,3 @@ if ( ! defined( 'WPINC' ) ) {
         </p>
     </div>
 </div>
-
-<script type="text/javascript">
-    jQuery(document).ready(function($) {
-        // Tab functionality
-        $('.nav-tab').click(function(e) {
-            e.preventDefault();
-
-            // Hide all tabs
-            $('.tab-content').hide();
-
-            // Show the selected tab
-            $($(this).attr('href')).show();
-
-            // Update active tab class
-            $('.nav-tab').removeClass('nav-tab-active');
-            $(this).addClass('nav-tab-active');
-        });
-
-        // Show the first tab by default
-        $('#all-plugins').show();
-        $('#needs-update').hide();
-        $('#by-size').hide();
-    });
-</script>
