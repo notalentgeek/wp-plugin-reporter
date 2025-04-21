@@ -104,8 +104,8 @@ $sort_by = isset( $_GET['sort'] ) ? sanitize_text_field( wp_unslash( $_GET['sort
         </div>
     </div>
 
-    <!-- Plugin details with tabbed interface -->
-    <div class="plugin-reporter-tabs">
+    <!-- Plugin details with sorting options -->
+    <div class="plugin-reporter-content">
         <h2 class="plugin-section-header">
             <?php esc_html_e( 'Plugin Details', 'plugin-reporter' ); ?>
             <div class="sort-controls">
@@ -119,166 +119,99 @@ $sort_by = isset( $_GET['sort'] ) ? sanitize_text_field( wp_unslash( $_GET['sort
             </div>
         </h2>
 
-        <nav class="nav-tab-wrapper wp-clearfix">
-            <a href="#all-plugins" class="nav-tab nav-tab-active" id="tab-all-plugins"><?php esc_html_e( 'All Plugins', 'plugin-reporter' ); ?></a>
-            <?php if ( $update_count > 0 ) : ?>
-                <a href="#needs-update" class="nav-tab" id="tab-needs-update"><?php esc_html_e( 'Needs Update', 'plugin-reporter' ); ?> <span class="update-count"><?php echo esc_html( $update_count ); ?></span></a>
-            <?php endif; ?>
-        </nav>
+        <!-- Plugin table -->
+        <table class="wp-list-table widefat fixed striped">
+            <thead>
+                <tr>
+                    <th style="width: 25%;"><?php esc_html_e( 'Plugin', 'plugin-reporter' ); ?></th>
+                    <th style="width: 80px;"><?php esc_html_e( 'Status', 'plugin-reporter' ); ?></th>
+                    <th style="width: 12%;"><?php esc_html_e( 'Current Version', 'plugin-reporter' ); ?></th>
+                    <th style="width: 12%;"><?php esc_html_e( 'Latest Version', 'plugin-reporter' ); ?></th>
+                    <th style="width: 12%;"><?php esc_html_e( 'Update Available', 'plugin-reporter' ); ?></th>
+                    <th style="width: 12%;"><?php esc_html_e( 'Size', 'plugin-reporter' ); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                // Create a copy of plugins data for sorting
+                $sorted_plugins = $plugins_data;
 
-        <!-- All plugins tab -->
-        <div id="all-plugins" class="tab-content">
-            <table class="wp-list-table widefat fixed striped">
-                <thead>
-                    <tr>
-                        <th style="width: 25%;"><?php esc_html_e( 'Plugin', 'plugin-reporter' ); ?></th>
-                        <th style="width: 80px;"><?php esc_html_e( 'Status', 'plugin-reporter' ); ?></th>
-                        <th style="width: 12%;"><?php esc_html_e( 'Current Version', 'plugin-reporter' ); ?></th>
-                        <th style="width: 12%;"><?php esc_html_e( 'Latest Version', 'plugin-reporter' ); ?></th>
-                        <th style="width: 12%;"><?php esc_html_e( 'Update Available', 'plugin-reporter' ); ?></th>
-                        <th style="width: 12%;"><?php esc_html_e( 'Size', 'plugin-reporter' ); ?></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    // Create a copy of plugins data for sorting
-                    $sorted_plugins = $plugins_data;
-
-                    // Sort plugins based on the selected criteria
-                    switch ( $sort_by ) {
-                        case 'size':
-                            // Sort by size (largest first)
-                            usort( $sorted_plugins, function( $a, $b ) {
-                                $size_a = isset( $a['size_bytes'] ) ? $a['size_bytes'] : 0;
-                                $size_b = isset( $b['size_bytes'] ) ? $b['size_bytes'] : 0;
-                                return $size_b - $size_a;
-                            });
-                            break;
-
-                        case 'name':
-                            // Sort by name (A-Z)
-                            usort( $sorted_plugins, function( $a, $b ) {
-                                return strcasecmp( $a['name'], $b['name'] );
-                            });
-                            break;
-
-                        case 'status':
-                            // Sort by status (active first)
-                            usort( $sorted_plugins, function( $a, $b ) {
-                                if ( $a['is_active'] && ! $b['is_active'] ) return -1;
-                                if ( ! $a['is_active'] && $b['is_active'] ) return 1;
-                                return strcasecmp( $a['name'], $b['name'] );
-                            });
-                            break;
-
-                        default:
-                            // Default sort: updates first, then active, then alphabetical
-                            usort( $sorted_plugins, function( $a, $b ) {
-                                // First sort by update availability
-                                if ( $a['update_available'] && ! $b['update_available'] ) return -1;
-                                if ( ! $a['update_available'] && $b['update_available'] ) return 1;
-
-                                // Then by active status
-                                if ( $a['is_active'] && ! $b['is_active'] ) return -1;
-                                if ( ! $a['is_active'] && $b['is_active'] ) return 1;
-
-                                // Finally by name
-                                return strcasecmp( $a['name'], $b['name'] );
-                            });
-                            break;
-                    }
-
-                    foreach ( $sorted_plugins as $plugin ) :
-                    ?>
-                        <tr>
-                            <td>
-                                <strong><?php echo esc_html( $plugin['name'] ); ?></strong>
-                                <div class="row-actions">
-                                    <span class="description"><?php echo esc_html( wp_trim_words( $plugin['description'], 20 ) ); ?></span>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="plugin-status-badge <?php echo esc_attr( $plugin['is_active'] ? 'active' : 'inactive' ); ?>">
-                                    <?php echo esc_html( $plugin['status'] ); ?>
-                                </span>
-                            </td>
-                            <td><?php echo esc_html( $plugin['version'] ); ?></td>
-                            <td class="<?php echo esc_attr( $plugin['update_available'] ? 'update-available' : '' ); ?>">
-                                <?php echo esc_html( $plugin['latest_version'] ); ?>
-                            </td>
-                            <td>
-                                <?php if ( $plugin['update_available'] ) : ?>
-                                    <span class="update-available"><?php esc_html_e( 'Yes', 'plugin-reporter' ); ?></span>
-                                <?php else : ?>
-                                    <span class="up-to-date"><?php esc_html_e( 'No', 'plugin-reporter' ); ?></span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php echo isset( $plugin['size_human'] ) ? esc_html( $plugin['size_human'] ) : esc_html__( 'Unknown', 'plugin-reporter' ); ?>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Needs update tab -->
-        <?php if ( $update_count > 0 ) : ?>
-            <div id="needs-update" class="tab-content" style="display: none;">
-                <table class="wp-list-table widefat fixed striped">
-                    <thead>
-                        <tr>
-                            <th style="width: 30%;"><?php esc_html_e( 'Plugin', 'plugin-reporter' ); ?></th>
-                            <th style="width: 100px;"><?php esc_html_e( 'Status', 'plugin-reporter' ); ?></th>
-                            <th style="width: 15%;"><?php esc_html_e( 'Current Version', 'plugin-reporter' ); ?></th>
-                            <th style="width: 15%;"><?php esc_html_e( 'Latest Version', 'plugin-reporter' ); ?></th>
-                            <th style="width: 15%;"><?php esc_html_e( 'Size', 'plugin-reporter' ); ?></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        // Filter plugins needing updates
-                        $needs_update = array_filter( $plugins_data, function( $plugin ) {
-                            return $plugin['update_available'];
+                // Sort plugins based on the selected criteria
+                switch ( $sort_by ) {
+                    case 'size':
+                        // Sort by size (largest first)
+                        usort( $sorted_plugins, function( $a, $b ) {
+                            $size_a = isset( $a['size_bytes'] ) ? $a['size_bytes'] : 0;
+                            $size_b = isset( $b['size_bytes'] ) ? $b['size_bytes'] : 0;
+                            return $size_b - $size_a;
                         });
+                        break;
 
-                        // Sort by active first, then alphabetical
-                        usort( $needs_update, function( $a, $b ) {
-                            // First by active status
+                    case 'name':
+                        // Sort by name (A-Z)
+                        usort( $sorted_plugins, function( $a, $b ) {
+                            return strcasecmp( $a['name'], $b['name'] );
+                        });
+                        break;
+
+                    case 'status':
+                        // Sort by status (active first)
+                        usort( $sorted_plugins, function( $a, $b ) {
+                            if ( $a['is_active'] && ! $b['is_active'] ) return -1;
+                            if ( ! $a['is_active'] && $b['is_active'] ) return 1;
+                            return strcasecmp( $a['name'], $b['name'] );
+                        });
+                        break;
+
+                    default:
+                        // Default sort: updates first, then active, then alphabetical
+                        usort( $sorted_plugins, function( $a, $b ) {
+                            // First sort by update availability
+                            if ( $a['update_available'] && ! $b['update_available'] ) return -1;
+                            if ( ! $a['update_available'] && $b['update_available'] ) return 1;
+
+                            // Then by active status
                             if ( $a['is_active'] && ! $b['is_active'] ) return -1;
                             if ( ! $a['is_active'] && $b['is_active'] ) return 1;
 
-                            // Then by name
+                            // Finally by name
                             return strcasecmp( $a['name'], $b['name'] );
                         });
+                        break;
+                }
 
-                        foreach ( $needs_update as $plugin ) :
-                        ?>
-                            <tr>
-                                <td>
-                                    <strong><?php echo esc_html( $plugin['name'] ); ?></strong>
-                                    <div class="row-actions">
-                                        <span class="description"><?php echo esc_html( wp_trim_words( $plugin['description'], 20 ) ); ?></span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="plugin-status-badge <?php echo esc_attr( $plugin['is_active'] ? 'active' : 'inactive' ); ?>">
-                                        <?php echo esc_html( $plugin['status'] ); ?>
-                                    </span>
-                                </td>
-                                <td><?php echo esc_html( $plugin['version'] ); ?></td>
-                                <td class="update-available">
-                                    <?php echo esc_html( $plugin['latest_version'] ); ?>
-                                </td>
-                                <td>
-                                    <?php echo isset( $plugin['size_human'] ) ? esc_html( $plugin['size_human'] ) : esc_html__( 'Unknown', 'plugin-reporter' ); ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php endif; ?>
+                foreach ( $sorted_plugins as $plugin ) :
+                ?>
+                    <tr>
+                        <td>
+                            <strong><?php echo esc_html( $plugin['name'] ); ?></strong>
+                            <div class="row-actions">
+                                <span class="description"><?php echo esc_html( wp_trim_words( $plugin['description'], 20 ) ); ?></span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="plugin-status-badge <?php echo esc_attr( $plugin['is_active'] ? 'active' : 'inactive' ); ?>">
+                                <?php echo esc_html( $plugin['status'] ); ?>
+                            </span>
+                        </td>
+                        <td><?php echo esc_html( $plugin['version'] ); ?></td>
+                        <td class="<?php echo esc_attr( $plugin['update_available'] ? 'update-available' : '' ); ?>">
+                            <?php echo esc_html( $plugin['latest_version'] ); ?>
+                        </td>
+                        <td>
+                            <?php if ( $plugin['update_available'] ) : ?>
+                                <span class="update-available"><?php esc_html_e( 'Yes', 'plugin-reporter' ); ?></span>
+                            <?php else : ?>
+                                <span class="up-to-date"><?php esc_html_e( 'No', 'plugin-reporter' ); ?></span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?php echo isset( $plugin['size_human'] ) ? esc_html( $plugin['size_human'] ) : esc_html__( 'Unknown', 'plugin-reporter' ); ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 
     <!-- Footer with links -->
